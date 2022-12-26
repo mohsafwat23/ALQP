@@ -34,9 +34,9 @@ class ALQP
 
         void algradhess(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu);
         
-        void primal_update();
+        void primal_update(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu, float tol=1e-6);
 
-        void dual_update();
+        void dual_update(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu);
 
         Eigen::VectorXd constraint_equality(Eigen::VectorXd x);
 

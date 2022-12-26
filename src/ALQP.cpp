@@ -48,13 +48,25 @@ Eigen::VectorXd ALQP::constraint_inequality(Eigen::VectorXd x)
     return C*x - d;
 }
 
-void ALQP::primal_update()
+// Update State using Newton's Method
+void ALQP::primal_update(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu, float tol)
 {
+    for(int i=0; i<15; i++)
+    {
+        algradhess(x, lambda, mu);
+        if (g.norm() < tol)
+        {
+            break;
+        }
+        x += -H.inverse()*g.transpose(); // CHECK THIS MIGHT NOT BE TRANSPOSED
+    }
+    
 
 }
 
-void ALQP::dual_update()
+void ALQP::dual_update(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu)
 {
-    
+    lambda += rho*constraint_equality(x);
+    mu += (rho*constraint_equality(x)).cwiseMax(0);
 }
 
