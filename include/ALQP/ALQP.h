@@ -17,30 +17,41 @@ class ALQP
 
         Eigen::VectorXd d;
 
+        Eigen::VectorXd x;
+
+        Eigen::VectorXd lambda;
+
+        Eigen::VectorXd mu;
+
         float rho;
+
+        float phi;
+
+        float tol_main;
 
         Eigen::VectorXd g;      // gradient of AL placeholder (might just make function Eigen:: ())
 
         Eigen::MatrixXd H;      // hessian of AL placeholder
 
+        int n;
 
-        ALQP(Eigen::MatrixXd Pin, Eigen::VectorXd qin, Eigen::MatrixXd Ain, Eigen::VectorXd bin, Eigen::MatrixXd Cin, Eigen::VectorXd din, float rho = 1.0); // Constructor
+        ALQP(Eigen::VectorXd x0, Eigen::MatrixXd Pin, Eigen::VectorXd qin, Eigen::MatrixXd Ain, Eigen::VectorXd bin, Eigen::MatrixXd Cin, Eigen::VectorXd din, float rho = 10.0); // Constructor
 
-        void solve();
+        void solve(int max_iters = 20);
 
-
+        Eigen::VectorXd get_primal();
     
     private:
 
-        void algradhess(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu);
+        void algradhess();
         
-        void primal_update(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu, float tol=1e-6);
+        void primal_update(float tol=1e-6);
 
-        void dual_update(Eigen::VectorXd x, Eigen::VectorXd lambda, Eigen::VectorXd mu);
+        void dual_update();
 
-        Eigen::VectorXd constraint_equality(Eigen::VectorXd x);
+        Eigen::VectorXd constraint_equality();
 
-        Eigen::VectorXd constraint_inequality(Eigen::VectorXd x);
+        Eigen::VectorXd constraint_inequality();
 
         void linesearch();
 };
