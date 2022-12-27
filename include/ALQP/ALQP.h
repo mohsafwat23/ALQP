@@ -40,18 +40,28 @@ class ALQP
         void solve(int max_iters = 20);
 
         Eigen::VectorXd get_primal();
+
+        Eigen::MatrixXd Irho;
+
+        Eigen::VectorXd ceq;
+
+        Eigen::VectorXd cinq;
     
     private:
 
-        void algradhess();
+        void algrad();
+
+        void alhess();
         
         void primal_update(float tol=1e-6);
 
         void dual_update();
 
-        Eigen::VectorXd constraint_equality();
+        void active_constraints();
 
-        Eigen::VectorXd constraint_inequality();
+        Eigen::VectorXd constraint_equality(Eigen::VectorXd xv);
 
-        void linesearch();
+        Eigen::VectorXd constraint_inequality(Eigen::VectorXd xv);
+
+        double AL(Eigen::VectorXd deltaX, double alpha);
 };

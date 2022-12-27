@@ -15,20 +15,30 @@ ALQP::ALQP(Eigen::VectorXd x0, Eigen::MatrixXd Pin, Eigen::VectorXd qin, Eigen::
     tol_main = 1e-6;
     lambda = Eigen::VectorXd::Zero(A.rows());
     mu = Eigen::VectorXd::Zero(C.rows());
+    ceq = Eigen::VectorXd::Zero(A.rows());
+    cinq = Eigen::VectorXd::Zero(C.rows());
     n = mu.rows();
+    Irho = Eigen::MatrixXd::Zero(n,n);
 
 }
 
-// Computes the gradient and hessian of the Augmented Lagrangian
-void ALQP::algradhess()
+double ALQP::AL(Eigen::VectorXd deltaX, double alpha)
 {
-    // int n = mu.rows();
-    Eigen::MatrixXd Irho(n,n);
+    // Merit Function: Augmented Lagrangian
+    Eigen::VectorXd xU = x + alpha*deltaX;
+    Eigen::VectorXd ceqU = constraint_equality(xU);
+    Eigen::VectorXd cinU = constraint_inequality(xU);
+    
+    return  0.5 * (xU).transpose() * P * (xU) + q.dot(xU) 
+        + lambda.dot(ceqU) + mu.dot(cinU) + 0.5*rho*ceqU.transpose()*ceqU + 0.5*(Irho*cinU).transpose()*cinU;
+}
+
+void ALQP::active_constraints()
+{
+    ceq = constraint_equality(x);
+    cinq = constraint_inequality(x);
+
     Irho.setZero();
-    Eigen::VectorXd ceq = constraint_equality();
-    Eigen::VectorXd cinq = constraint_inequality();
-
-
     // Check for the active contraints
     for(int i=0; i<n; i++)
     {
@@ -38,23 +48,32 @@ void ALQP::algradhess()
             Irho(i,i) = rho;
         }
     }
+}
 
-    // Analytic gradient
+
+
+// Computes the gradient and hessian of the Augmented Lagrangian
+void ALQP::algrad()
+{
+    // Analytic gradient of AL
     g = (P * x + q + A.transpose() * lambda + C.transpose() * mu).transpose() + (rho * ceq).transpose() * A +
         (Irho * cinq).transpose() * C;
+}
 
-    // Analytic hessian
+void ALQP::alhess()
+{
+    // Analytic hessian of AL
     H = P + (Irho * C).transpose() * C + (rho * A).transpose() * A;
 }
 
-Eigen::VectorXd ALQP::constraint_equality()
+Eigen::VectorXd ALQP::constraint_equality(Eigen::VectorXd xv)
 {
-    return A*x - b;
+    return A*xv - b;
 }
 
-Eigen::VectorXd ALQP::constraint_inequality()
+Eigen::VectorXd ALQP::constraint_inequality(Eigen::VectorXd xv)
 {
-    return C*x - d;
+    return C*xv - d;
 }
 
 // Update State using Newton's Method
@@ -62,16 +81,31 @@ void ALQP::primal_update(float tol)
 {
     for(int i=0; i<10; i++)
     {
+        // Get active constraint matrix
+        active_constraints();
+
         // Compute gradient and hessian of AL
-        algradhess();
+        algrad();
+        alhess();
 
         // Check if the gradient is 0 (a.k.a minima)
         if (g.norm() < tol)
         {
             break;
         }
-        
-        x += -H.inverse()*g; 
+
+        Eigen::VectorXd deltaX = -H.inverse()*g;
+
+        double alpha = 1.0;
+        float alpha_scaling = 0.5;
+        float beta = 0.01;
+
+        while(AL(deltaX, alpha) > AL(deltaX, 0.0) + beta*alpha*g.dot(deltaX))
+        {
+            alpha *= alpha_scaling;
+        }
+
+        x += alpha*deltaX; 
 
     }
     
@@ -80,8 +114,8 @@ void ALQP::primal_update(float tol)
 
 void ALQP::dual_update()
 {
-    lambda += rho*constraint_equality();
-    mu += (rho*constraint_inequality()).cwiseMax(0);
+    lambda += rho*constraint_equality(x);
+    mu += (rho*constraint_inequality(x)).cwiseMax(0);
 }
 
 void ALQP::solve(int max_iters)
@@ -97,7 +131,7 @@ void ALQP::solve(int max_iters)
         rho = phi*rho;
 
 
-        if (constraint_equality().norm() < tol_main && (constraint_inequality().cwiseMax(0)).norm() < tol_main)
+        if (constraint_equality(x).norm() < tol_main && (constraint_inequality(x).cwiseMax(0)).norm() < tol_main)
         {
             break;
         }

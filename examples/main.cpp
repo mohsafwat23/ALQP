@@ -8,35 +8,37 @@ int main(){
     using std::chrono::duration;
     using std::chrono::milliseconds;
 
-    //Eigen::MatrixXd M = Eigen::MatrixXd::Random(3,3);
-    Eigen::MatrixXd M(3,3);
-    M << 2, 0.5, 8,
-        3, 15, 2,
-        2, 2, 4;
+    // Change random Matrices https://stackoverflow.com/questions/21292881/matrixxfrandom-always-returning-same-matrices
+
+    Eigen::MatrixXd M = Eigen::MatrixXd::Random(3,3);
+    // Eigen::MatrixXd M(3,3);
+    // M << 2, 0.5, 8,
+    //     3, 15, 2,
+    //     2, 2, 4;
 
     Eigen::MatrixXd P = M.transpose() * M;
 
-    //Eigen::VectorXd q = Eigen::VectorXd::Random(3);
-    Eigen::VectorXd q(3);
-    q << 1,2,3;
+    Eigen::VectorXd q = Eigen::VectorXd::Random(3);
+    // Eigen::VectorXd q(3);
+    // q << 1,2,3;
 
-    //Eigen::MatrixXd A = Eigen::MatrixXd::Random(1,3);
-    Eigen::MatrixXd A(1,3);
-    A << 1,4,5;
+    Eigen::MatrixXd A = Eigen::MatrixXd::Random(1,3);
+    // Eigen::MatrixXd A(1,3);
+    // A << 1,4,5;
 
-    //Eigen::VectorXd b = Eigen::VectorXd::Random(1);
-    Eigen::VectorXd b(1);
-    b << 2;
+    Eigen::VectorXd b = Eigen::VectorXd::Random(1);
+    // Eigen::VectorXd b(1);
+    // b << 2;
 
-    //Eigen::MatrixXd C = Eigen::MatrixXd::Random(3,3);
-    Eigen::MatrixXd C(3,3);
-    C << 1, 2, 4, 
-        1, 5, 2, 
-        8, 4, 3;
+    Eigen::MatrixXd C = Eigen::MatrixXd::Random(3,3);
+    // Eigen::MatrixXd C(3,3);
+    // C << 1, 2, 4, 
+    //     1, 5, 2, 
+    //     8, 4, 3;
 
-    //Eigen::VectorXd d = Eigen::VectorXd::Random(3);
-    Eigen::VectorXd d(3);
-    d << 2,5,7;
+    Eigen::VectorXd d = Eigen::VectorXd::Random(3);
+    // Eigen::VectorXd d(3);
+    // d << 2,5,7;
 
     Eigen::VectorXd x =  Eigen::VectorXd::Zero(3);
 
