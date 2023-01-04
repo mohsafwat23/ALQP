@@ -19,6 +19,7 @@ ALQP::ALQP(Eigen::VectorXd x0, Eigen::MatrixXd Pin, Eigen::VectorXd qin, Eigen::
     cinq = Eigen::VectorXd::Zero(C.rows());
     n = mu.rows();
     Irho = Eigen::MatrixXd::Zero(n,n);
+    n_iters = 0;
 
 }
 
@@ -42,8 +43,8 @@ void ALQP::active_constraints()
     // Check for the active contraints
     for(int i=0; i<n; i++)
     {
-        // if constraint is active and the dual variable associated with it is not 0
-        if (cinq[i] > 0 && mu[i] != 0)
+        // if constraint is active or the dual variable associated with it is not 0
+        if (cinq[i] > 0 || mu[i] != 0)
         {
             Irho(i,i) = rho;
         }
@@ -56,7 +57,7 @@ void ALQP::active_constraints()
 void ALQP::algrad()
 {
     // Analytic gradient of AL
-    g = (P * x + q + A.transpose() * lambda + C.transpose() * mu).transpose() + (rho * ceq).transpose() * A +
+    g = (P * x + q + (A.transpose() * lambda) + (C.transpose() * mu)).transpose() + (rho * ceq).transpose() * A +
         (Irho * cinq).transpose() * C;
 }
 
@@ -107,6 +108,7 @@ void ALQP::primal_update(float tol)
 
         x += alpha*deltaX; 
 
+        n_iters += 1;
     }
     
 
@@ -129,8 +131,7 @@ void ALQP::solve(int max_iters)
         dual_update();
 
         rho = phi*rho;
-
-
+        
         if (constraint_equality(x).norm() < tol_main && (constraint_inequality(x).cwiseMax(0)).norm() < tol_main)
         {
             break;
@@ -142,3 +143,8 @@ Eigen::VectorXd ALQP::get_primal()
 {
     return x;
 }
+
+double ALQP::get_cost()
+{
+    return 0.5 * (x).transpose() * P * (x) + q.dot(x);
+} 

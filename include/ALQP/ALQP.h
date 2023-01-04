@@ -41,11 +41,15 @@ class ALQP
 
         Eigen::VectorXd get_primal();
 
+        double get_cost();
+
         Eigen::MatrixXd Irho;
 
         Eigen::VectorXd ceq;
 
         Eigen::VectorXd cinq;
+
+        int n_iters;
     
     private:
 
@@ -64,4 +68,5 @@ class ALQP
         Eigen::VectorXd constraint_inequality(Eigen::VectorXd xv);
 
         double AL(Eigen::VectorXd deltaX, double alpha);
+
 };
