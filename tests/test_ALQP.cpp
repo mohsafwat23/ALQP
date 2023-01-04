@@ -69,6 +69,7 @@ TEST(ALQPSolver, RandomValues) {
     // settings
     //solver.settings()->setVerbosity(false);
     solver.settings()->setWarmStart(true);
+    solver.settings()->setAbsoluteTolerance(1e-6);
 
     // OSQPSolution vector
     Eigen::VectorXd OSQPSolution;
@@ -85,33 +86,44 @@ TEST(ALQPSolver, RandomValues) {
     // // instantiate the solver
     solver.initSolver();
 
-    solver.solveProblem();
-
-    OSQPSolution = solver.getSolution();
-
-    std::cout << "OSQP Solution: " << OSQPSolution << "\n";
-
-
-    std::cout << "x: " << x << "\n";
-
-
-    // ================================================ Custom ALQP ================================================
-
-    ALQP opt(x,P,q,A,b,C,d);
-
     auto t0 = high_resolution_clock::now();
-    opt.solve();
+    solver.solveProblem();
     auto t1 = high_resolution_clock::now();
 
     /* Getting number of milliseconds as a double. */
     duration<double, std::milli> ms_double = t1 - t0;
 
-    std::cout << ms_double.count() << "ms\n";
+    OSQPSolution = solver.getSolution();
 
-    std::cout << "ALQP Solution: " <<opt.x << "\n";
+    std::cout << "OSQP speed: " << ms_double.count() << "ms\n";
 
-    // Expect two strings not to be equal.
-    EXPECT_STRNE("hello", "world");
+    std::cout << "OSQP Solution: " << OSQPSolution << "\n";
+
+    std::cout << "x: " << x << "\n";
+
+
+    // ================================================ ALQP ================================================
+
+    ALQP opt(x,P,q,A,b,C,d);
+
+    t0 = high_resolution_clock::now();
+    opt.solve();
+    t1 = high_resolution_clock::now();
+
+    /* Getting number of milliseconds as a double. */
+    ms_double = t1 - t0;
+
+    std::cout << "ALQP speed: " << ms_double.count() << "ms\n";
+
+    std::cout << "ALQP Solution: " << opt.x << "\n";
+
+    std::cout << "ALQP Optimal Objective: " << opt.get_cost() << "\n";
+
+    std::cout << "ALQP iterations: " << opt.n_iters << "\n";
+
+
     // Expect equality.
-    EXPECT_EQ(7 * 6, 42);
+    EXPECT_EQ(roundf((opt.x[0] * 1000) / 1000),roundf((OSQPSolution[0] * 1000) / 1000));
+    EXPECT_EQ(roundf((opt.x[1] * 1000) / 1000),roundf((OSQPSolution[1] * 1000) / 1000));
+    EXPECT_EQ(roundf((opt.x[2] * 1000) / 1000),roundf((OSQPSolution[2] * 1000) / 1000));
 }
