@@ -115,12 +115,12 @@ int main(){
 
     ALQP opt(x,P,q,A,b,C,d);
 
-    auto t0 = high_resolution_clock::now();
+    //auto t0 = high_resolution_clock::now();
     opt.solve();
-    auto t1 = high_resolution_clock::now();
+    //auto t1 = high_resolution_clock::now();
 
     /* Getting number of milliseconds as a double. */
-    duration<double, std::milli> ms_double = t1 - t0;
+    //duration<double, std::milli> ms_double = t1 - t0;
 
     //std::cout << ms_double.count() << "ms\n";
 

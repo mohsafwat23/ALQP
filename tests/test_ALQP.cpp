@@ -68,7 +68,7 @@ TEST(ALQPSolver, RandomValues) {
 
     // settings
     //solver.settings()->setVerbosity(false);
-    solver.settings()->setWarmStart(true);
+    solver.settings()->setWarmStart(false);
     solver.settings()->setAbsoluteTolerance(1e-6);
 
     // OSQPSolution vector
@@ -106,9 +106,21 @@ TEST(ALQPSolver, RandomValues) {
 
     ALQP opt(x,P,q,A,b,C,d);
 
+    // TEMP
+    float rho = 10.0;
+    Eigen::VectorXd mu = Eigen::VectorXd::Zero(C.rows());
+    Eigen::MatrixXd Irho = Eigen::MatrixXd::Zero(mu.rows(),mu.rows());
+    Eigen::VectorXd ceq = Eigen::VectorXd::Zero(A.rows());
+    Eigen::VectorXd cinq = Eigen::VectorXd::Zero(C.rows());
+    Eigen::VectorXd lambda = Eigen::VectorXd::Zero(A.rows());
+    //
+    Eigen::VectorXd g;
     t0 = high_resolution_clock::now();
     opt.solve();
     t1 = high_resolution_clock::now();
+
+    // g = (P * x + q + (A.transpose() * lambda) + (C.transpose() * mu)).transpose() + (rho * ceq).transpose() * A +
+    //     (Irho * cinq).transpose() * C;
 
     /* Getting number of milliseconds as a double. */
     ms_double = t1 - t0;

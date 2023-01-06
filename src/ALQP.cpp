@@ -80,7 +80,7 @@ Eigen::VectorXd ALQP::constraint_inequality(Eigen::VectorXd xv)
 // Update State using Newton's Method
 void ALQP::primal_update(float tol)
 {
-    for(int i=0; i<10; i++)
+    for(int i=10; i--; )
     {
         // Get active constraint matrix
         active_constraints();
@@ -99,7 +99,7 @@ void ALQP::primal_update(float tol)
 
         double alpha = 1.0;
         float alpha_scaling = 0.5;
-        float beta = 0.01;
+        float beta = 0.1;
 
         while(AL(deltaX, alpha) > AL(deltaX, 0.0) + beta*alpha*g.dot(deltaX))
         {
@@ -122,7 +122,7 @@ void ALQP::dual_update()
 
 void ALQP::solve(int max_iters)
 {
-    for(int i=0; i < max_iters; i++)
+    for(int i=max_iters; i--; )  //for(int i=0; i < max_iters; i++)
     {
         // Update primals (inner loop is unconstrained)
         primal_update();
